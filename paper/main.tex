@@ -64,13 +64,14 @@ Blah.
 \section{Methodology}
 Fix a uniform-cost random-access machine model of computation.
 
-Let $V$ be a finite vocabulary totally ordered by $\preceq$,
-and $\Pr$ be a next-token kernel,
-and $\varepsilon\in\R_{(0,1)}$ be a machine epsilon,
-and $\gamma\in\R_{(0,1)}$ be a discount factor.
-
 Let $\ell$ denote $\log\Pr$,
 and juxtaposition denote concatenation.
+
+Let $V$ be a finite vocabulary totally ordered by $\preceq$,
+and $\Pr$ be a next-token kernel,
+and $\gamma\in\R_{(0,1)}$ be a discount factor,
+and $\varepsilon\in\R_{(0,1)}$ be a machine epsilon,
+and $\delta\in\R_{(0,1)}$ be a confidence tolerance.
 
 We define the update operator
 \begin{gather}
@@ -92,6 +93,10 @@ We define the update operator
 \begin{proof}
 	Trivial.
 \end{proof}
+
+
+\newpage
+
 
 We define the decoding rule
 \begin{gather}
@@ -169,17 +174,18 @@ where $t\in\N$.
 	for each $t\in\N$, and for each $x\in V^{*}$.
 \end{proposition}
 
-For brevity, we define
+\begin{proof}
+	Trivial.
+\end{proof}
+
+Let $Q_{G}(x,y)$ denote
 \begin{gather}
-	Q_{G}:V^{*}\times V\to\R
-	\nonumber\\
 	Q_{G}(x,y)
 	=
 	\ell(y\mid x)
 	+
 	\gamma G(xy)
 \end{gather}
-where $G\in\R^{V^{*}}$.
 
 \begin{algorithm}[H]
 	\caption{\textsc{Decode}$(x)$}
@@ -241,9 +247,13 @@ where $G\in\R^{V^{*}}$.
 	Let $x\in V^{*}$. If $f(x)$ exists, then $\textsc{Decode}$ halts on $x$.
 \end{proposition}
 
+
 \newpage
 
-We define
+
+For tractability, we propose a Probably Approximately Correct (PAC) variant of our algorithm.
+
+We define the error decomposition
 \begin{equation}
 	\bm{e}=\varepsilon(p_\text{tail},p_\text{stat},p_\text{gap})
 \end{equation}
