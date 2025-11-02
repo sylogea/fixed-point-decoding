@@ -1,0 +1,351 @@
+\documentclass[11pt]{article}
+
+\usepackage[preprint]{acl}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx,inconsolata,latexsym,microtype,times}
+
+\usepackage{amsfonts,amssymb,bm,booktabs,cancel,caption,centernot,dsfont,graphicx,marvosym,mathtools,nicefrac,physics,stackengine,subcaption,textcomp,tikz,xcolor,xparse}
+\usepackage[scr=boondox]{mathalpha}
+
+\usepackage{algorithm,algorithmicx,algpseudocode}
+\algrenewcomment[1]{\textcolor{black!50}{\small\text{\# }\textit{#1}}}
+
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{theorem}{theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{claim}
+\newtheorem{remark}{Remark}
+
+\usepackage{parskip}
+\makeatletter
+\newlength{\thmextra}
+\setlength{\thmextra}{\parskip}
+\addtolength{\thmextra}{2pt}
+\def\thm@space@setup{\thm@preskip=\thmextra \thm@postskip=0pt}
+\makeatother
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\newcommand{\quotes}[1]{\text{``#1''}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\inner}[1]{\langle #1\rangle}
+\newcommand{\eostoken}{\#}
+\newcommand{\mdoubleplus}{\mathbin{+\mkern-11mu+}}
+
+\title{Fixed-Point Decoding}
+
+\author{
+	First Author \and Second Author \and Third Author \\
+	Singapore University of Technology and Design \\
+	\texttt{\{blah\_bleh, ..., bleh\_blue\}@mymail.sutd.edu.sg}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	Main contributions and findings (200 words).
+\end{abstract}
+
+\section{Introduction}
+Blah.
+
+\section{Related Work}
+Blah.
+
+\section{Methodology}
+Fix a uniform-cost random-access machine model of computation.
+
+Let $V$ be a finite vocabulary totally ordered by $\preceq$,
+and $\Pr$ be a next-token kernel,
+and $\varepsilon\in\R_{(0,1)}$ be a machine epsilon,
+and $\gamma\in\R_{(0,1)}$ be a discount factor.
+
+Let $\ell$ denote $\log\Pr$,
+and juxtaposition denote concatenation.
+
+We define the update operator
+\begin{gather}
+	\mathscr{U}:\R^{V^{*}}\to\R^{V^{*}}
+	\nonumber\\
+	\mathscr{U}(G)[x]
+	=
+	\max_{y\in V}\left[
+		\ell(y\mid x)
+		+
+		\gamma G(xy)
+	\right]
+\end{gather}
+
+\begin{proposition}[Existence and Uniqueness]
+	There exists a unique fixed point of $\mathscr{U}$.
+\end{proposition}
+
+\begin{proof}
+	Trivial.
+\end{proof}
+
+We define the decoding rule
+\begin{gather}
+	f:V^{*}\to V
+	\nonumber\\
+	f(x)
+	\in
+	\argmax_{y\in V}\left[
+		\ell(y\mid x)
+		+
+		\gamma G(xy)
+	\right]
+\end{gather}
+where
+$\gamma\in\R_{(0,1)}$,
+and $G=\mathscr{U}_{\gamma}(G)$.
+
+We define the lower bounding sequence
+\begin{gather}
+	l_{t}:V^{*}\to\R
+	\nonumber\\
+	l_{t}(x)
+	=
+	\begin{cases}
+		-\frac{
+			\sup_{x\in V^{*},y\in V}
+			\abs{\ell(y\mid x)}
+		}{
+			1-\gamma
+		}
+		, &
+			t=0
+		\\
+		\mathscr{U}(l_{t-1})
+		, &
+		t\geq 1
+	\end{cases}
+\end{gather}
+where $t\in\N$.
+
+We define the upper bounding sequence
+\begin{gather}
+	u_{t}:V^{*}\to\R
+	\nonumber\\
+	u_{t}(x)
+	=
+	\begin{cases}
+		0
+		, &
+		t=0
+		\\
+		\min\left[
+			u_{t-1},
+			\mathscr{U}(u_{t-1})
+		\right]
+		, &
+		t\geq 1
+	\end{cases}
+\end{gather}
+where $t\in\N$.
+
+\begin{proposition}[Convergence]
+	Let $G\in\R^{V^{*}}$ be the fixed point of $\mathscr{U}$. Then,
+	$$
+		l_{t}(x)\leq l_{t+1}(x)\leq G(x)\leq u_{t+1}(x)\leq u_{t}(x)
+	$$
+	and
+	$$
+		\lim_{t\to\infty}l_{t}(x)
+		=
+		\lim_{t\to\infty}u_{t}(x)
+		=
+		G(x)
+	$$
+	for each $t\in\N$, and for each $x\in V^{*}$.
+\end{proposition}
+
+For brevity, we define
+\begin{gather}
+	Q_{G}:V^{*}\times V\to\R
+	\nonumber\\
+	Q_{G}(x,y)
+	=
+	\ell(y\mid x)
+	+
+	\gamma G(xy)
+\end{gather}
+where $G\in\R^{V^{*}}$.
+
+\begin{algorithm}[H]
+	\caption{\textsc{Decode}$(x)$}
+
+	\textbf{Input}: $x\in V^{*}$ \Comment{Current prefix}
+
+	\textbf{Output}: $\hat{y}\in V$ \Comment{Next token}
+
+	\Comment{Initialise step}
+
+	$t\gets 0$
+
+	\textbf{while true}:
+
+	\quad \Comment{Get candidate}
+
+	\quad ${
+		\hat{y}
+		\gets
+		\argmax_{y\in V}
+		Q_{l_{t}}(x,y)
+	}$
+
+	\quad \Comment{Get candidate-competitor gap}
+
+	\quad ${
+		\delta
+		\gets
+		Q_{l_{t}}(x,\hat{y})
+		-
+		\max_{z\neq\hat{y}}
+		Q_{u_{t}}(x,z)
+	}$
+
+	\quad \Comment{Return candidate if gap is tolerable}
+
+	\quad \textbf{if }$\delta>\varepsilon$:
+
+	\quad\quad \textbf{return }$\hat{y}$
+
+	\quad \Comment{Tighten lower bound}
+
+	\quad $l_{t+1}\gets\mathscr{U}(l_{t})$
+
+	\quad \Comment{Tighten upper bound}
+
+	\quad $u_{t+1}\gets\min\left[u_{t},\mathscr{U}(u_{t})\right]$
+
+	\quad \Comment{Increment step}
+
+	\quad $t \gets t+1$
+\end{algorithm}
+
+\begin{proposition}[Soundness]
+	Let $x\in V^{*}$. If $\textsc{Decode}$ halts on $x$, then $\textsc{Decode}(x)=f(x)$.
+\end{proposition}
+
+\begin{proposition}[Completeness]
+	Let $x\in V^{*}$. If $f(x)$ exists, then $\textsc{Decode}$ halts on $x$.
+\end{proposition}
+
+\newpage
+
+We define
+\begin{equation}
+	\bm{e}=\varepsilon(p_\text{tail},p_\text{stat},p_\text{gap})
+\end{equation}
+where $(p_\text{tail},p_\text{stat},p_\text{gap})$ lies on the $2$-simplex.
+
+\begin{algorithm}[H]
+	\caption{\textsc{PAC-Decode}$(x)$}
+
+	\textbf{Input}: $x\in V^{*}$ \Comment{Current prefix}
+
+	\textbf{Output}: $\hat{y}\in V$ \Comment{Next token}
+
+	$S\gets\sup_{x\in V^{*},y\in V}\abs{\ell(y\mid x)}$
+
+	${
+		H
+		\gets
+		\min\left\{
+			n\in\N
+			\mid
+			\frac{
+				\gamma^{n+1}M
+			}{
+				1-\gamma
+			}
+			\leq
+			e_{1}
+		\right\}
+	}$
+
+	\textbf{for }$y\in V$:
+
+	\quad $U_{\infty}(x,y)\gets\frac{\ell(y\mid x)}{1-\gamma}$
+
+	$\tau(x)\gets\max_{z\in V}\left[U(x,z)\right]-(1-\gamma)e_{3}$
+
+	$C(x)\gets\{y\in V\mid\tau(x)\leq U_{\infty}(x,y)\}$
+
+	\textbf{for }$y\in C(x)$:
+
+	\quad $n(y)\gets 0$
+
+	\quad $\mu_{y}(x)\gets 0$
+
+	\textbf{while not }$\Delta\leq\varepsilon$:
+
+	\quad \textbf{for }$y\in C(x)$:
+
+	\quad\quad $n(y)\gets n(y)+1$
+
+	\quad\quad $x_{0}\gets xy$
+
+	\quad\quad $r\gets 0$
+
+	\quad\quad \textbf{for }$t\in\N_{[0,H-1]}$:
+
+	\quad\quad\quad $y_{t}\gets\argmax_{v\in V}\ell(v\mid x_{t})$
+
+	\quad\quad\quad $r\gets r+\gamma^{t}\ell(y_{t}\mid x_{t})$
+
+	\quad\quad\quad $x_{t+1}\gets x_{t}y_{t}$
+
+	\quad\quad $\mu_{y}(x)\gets\mu_{y}(x)+\frac{r-\mu_{y}(x)}{n(y)}$
+
+	\quad \textbf{for }$y\in C(x)$:
+
+	\quad\quad ${
+		\beta(x,y)
+		\gets
+		\frac{S}{1-\gamma}
+		\sqrt{
+			\frac{
+				2\ln(\nicefrac{4\abs{C(x)}}{\delta})
+			}{
+				n(y)
+			}
+		}
+	}$
+
+	\quad\quad $L(x,y)\gets\mu_{y}(x)-\beta(x,y)-e_{2}$
+
+	\quad\quad $U(x,y)\gets U_{\infty}(x,y)$
+
+	\quad $\hat{y}\gets\argmax_{y\in C(x)}L(x,y)$
+
+	\quad $\Delta\gets L(x,\hat{y})-\max_{z\in C(x),z\neq\hat{y}}U(x,z)$
+
+	\textbf{return }$\hat{y}$
+\end{algorithm}
+
+
+\newpage
+
+
+\section{Experimentation}
+
+\section{Conclusion}
+
+\bibliography{main}
+
+\appendix
+\section{Appendix Title}
+Appendix content goes here \citep{example2025}.
+
+\end{document}
