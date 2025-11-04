@@ -275,7 +275,7 @@ where $(p_\text{tail},p_\text{stat},p_\text{gap})$ lies on the $2$-simplex.
 			n\in\N
 			\mid
 			\frac{
-				\gamma^{n+1}M
+				\gamma^{n+1}S
 			}{
 				1-\gamma
 			}
@@ -286,9 +286,9 @@ where $(p_\text{tail},p_\text{stat},p_\text{gap})$ lies on the $2$-simplex.
 
 	\textbf{for }$y\in V$:
 
-	\quad $U_{\infty}(x,y)\gets\frac{\ell(y\mid x)}{1-\gamma}$
+	\quad $U_{\infty}(x,y)\gets\ell(y\mid x)+\frac{\gamma S}{1-\gamma}$
 
-	$\tau(x)\gets\max_{z\in V}\left[U(x,z)\right]-(1-\gamma)e_{3}$
+	$\tau(x)\gets\max_{z\in V}\left[U(x,z)\right]-e_{3}$
 
 	$C(x)\gets\{y\in V\mid\tau(x)\leq U_{\infty}(x,y)\}$
 
@@ -298,7 +298,9 @@ where $(p_\text{tail},p_\text{stat},p_\text{gap})$ lies on the $2$-simplex.
 
 	\quad $\mu_{y}(x)\gets 0$
 
-	\textbf{while not }$\Delta\leq\varepsilon$:
+	$\Delta\gets 0$
+
+	\textbf{while }$\Delta\leq\varepsilon$:
 
 	\quad \textbf{for }$y\in C(x)$:
 
@@ -346,6 +348,7 @@ where $(p_\text{tail},p_\text{stat},p_\text{gap})$ lies on the $2$-simplex.
 
 
 \newpage
+
 
 
 \section{Experimentation}
